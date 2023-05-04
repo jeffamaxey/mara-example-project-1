@@ -20,21 +20,38 @@ pipeline.add_initial(
         id="initialize_schema",
         description="Recreates the metabase schema",
         commands=[
-            ExecuteSQL(sql_statement=f"""
+            ExecuteSQL(
+                sql_statement="""
 DROP SCHEMA IF EXISTS util CASCADE;
 CREATE SCHEMA util;            
 
 DROP SCHEMA IF EXISTS metabase_next CASCADE;
 CREATE SCHEMA metabase_next;
-""", echo_queries=False, db_alias='metabase-data-write'),
+""",
+                echo_queries=False,
+                db_alias='metabase-data-write',
+            ),
             ExecuteSQL(
                 sql_file_name=str(
-                    initialize_db.pipeline.nodes['initialize_utils'].base_path() / 'schema_switching.sql'),
-                db_alias='metabase-data-write'),
+                    initialize_db.pipeline.nodes[
+                        'initialize_utils'
+                    ].base_path()
+                    / 'schema_switching.sql'
+                ),
+                db_alias='metabase-data-write',
+            ),
             ExecuteSQL(
-                sql_file_name=str(initialize_db.pipeline.nodes['initialize_utils'].base_path() / 'cstore_fdw.sql'),
-                db_alias='metabase-data-write')
-        ]))
+                sql_file_name=str(
+                    initialize_db.pipeline.nodes[
+                        'initialize_utils'
+                    ].base_path()
+                    / 'cstore_fdw.sql'
+                ),
+                db_alias='metabase-data-write',
+            ),
+        ],
+    )
+)
 
 for data_set in data_sets():
     def query(data_set):

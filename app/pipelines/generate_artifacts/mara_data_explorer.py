@@ -20,10 +20,16 @@ pipeline.add_initial(
         id="initialize_schema",
         description="Recreates the data_sets schema",
         commands=[
-            ExecuteSQL(sql_statement=f"""
+            ExecuteSQL(
+                sql_statement="""
 DROP SCHEMA IF EXISTS data_sets_next CASCADE;
 CREATE SCHEMA data_sets_next;
-""", echo_queries=False)]))
+""",
+                echo_queries=False,
+            )
+        ],
+    )
+)
 
 for data_set in data_sets():
     def query(data_set):

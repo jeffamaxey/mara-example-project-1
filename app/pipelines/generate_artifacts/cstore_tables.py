@@ -10,16 +10,13 @@ def create_cstore_table_for_query(sql_select_statement, database_schema, table_n
 
     with mara_db.postgresql.postgres_cursor_context('dwh') as cursor:
         cursor.execute('SELECT oid, typname FROM pg_type;')
-        db_types = {}
-        for oid, type_name in cursor.fetchall():
-            db_types[oid] = type_name
+        db_types = dict(cursor.fetchall())
+        cursor.execute(f'{sql_select_statement} LIMIT 0')
 
-        cursor.execute(sql_select_statement + ' LIMIT 0')
-
-        column_specs = []
-        for column in cursor.description:
-            column_specs.append(f'"{column.name}" {db_types[column.type_code]}')
-
+        column_specs = [
+            f'"{column.name}" {db_types[column.type_code]}'
+            for column in cursor.description
+        ]
         ddl = f"""
 DROP FOREIGN TABLE IF EXISTS "{database_schema}"."{table_name}";
 CREATE FOREIGN TABLE "{database_schema}"."{table_name}" (
